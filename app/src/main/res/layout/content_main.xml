@@ -27,8 +27,8 @@
 
             <ListView
                 android:id="@+id/countriesList"
-                android:layout_width="match_parent"
-                android:layout_height="450dp" />
+                android:layout_width="355dp"
+                android:layout_height="371dp" />
 
             <Button
                 android:id="@+id/button5"
@@ -37,14 +37,25 @@
                 android:gravity="center"
 
                 android:orientation="vertical"
-                android:text="Button" />
+                android:text="Button add" />
 
             <CheckBox
                 android:id="@+id/checkBox1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Confirm sudo" />
-
+            <EditText
+                android:id="@+id/etName"
+                android:hint="Name of file"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            </EditText>
+            <Button
+                android:id="@+id/btnShow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="show">
+            </Button>
 
         </LinearLayout>
     </FrameLayout>

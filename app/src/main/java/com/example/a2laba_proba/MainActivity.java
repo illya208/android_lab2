@@ -1,10 +1,15 @@
 package com.example.a2laba_proba;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -21,6 +26,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -36,9 +42,11 @@ import java.util.Vector;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private List<State> states = new ArrayList();
-
+    DBclass dbHelper;
+    EditText etName;
     ListView countriesList;
     ViewGroup m_my_list;
+    Button btnshow;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,9 +54,10 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+
         final StateAdapter stateAdapter = new StateAdapter(this, R.layout.list_item, states);
-
-
+        dbHelper = new DBclass(this);
+        etName = (EditText) findViewById(R.id.etName);
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -65,13 +74,27 @@ public class MainActivity extends AppCompatActivity
                 Date date = new Date();
                 DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
                 if(checkb.isChecked()) {
+
+
+                    String name = etName.getText().toString();
                     //to convert Date to String, use format method of SimpleDateFormat class.
                     String strDate = dateFormat.format(date);
-                    states.add(new State("added file", strDate, R.drawable.file));
+                    states.add(new State(name, strDate, R.drawable.file));
                     Toast.makeText(getApplicationContext(), "file was added ",
                             Toast.LENGTH_SHORT).show();
 
                     stateAdapter.notifyDataSetChanged();
+
+
+                    SQLiteDatabase database = dbHelper.getWritableDatabase();
+                    ContentValues contentValues = new ContentValues();
+
+                    contentValues.put(DBclass.KEY_NAME, name);
+                    contentValues.put(DBclass.KEY_DATE, strDate);
+                    database.insert(DBclass.TABLE_CONTACTS, null, contentValues);
+
+
+
                 }
                 else{
                     Toast.makeText(getApplicationContext(), "Turn on THE SUDO mode",
@@ -81,6 +104,40 @@ public class MainActivity extends AppCompatActivity
         };
 
         btnOk.setOnClickListener(oclBtnOk);
+
+
+
+
+        btnshow = (Button) findViewById(R.id.btnShow);
+        View.OnClickListener addBtnOk=new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                SQLiteDatabase database = dbHelper.getWritableDatabase();
+                Cursor cursor = database.query(DBclass.TABLE_CONTACTS, null, null, null, null, null, null);
+
+                if (cursor.moveToFirst()) {
+                    int idIndex = cursor.getColumnIndex(DBclass.KEY_ID);
+                    int nameIndex = cursor.getColumnIndex(DBclass.KEY_NAME);
+                    int dateIndex = cursor.getColumnIndex(DBclass.KEY_DATE);
+                    do {
+                        Log.d("mLog", "ID = " + cursor.getInt(idIndex) +
+                                ", name = " + cursor.getString(nameIndex) +
+                                ", Date = " + cursor.getString(dateIndex));
+                    } while (cursor.moveToNext());
+                } else
+                    Log.d("mLog","0 rows");
+
+                cursor.close();
+            }
+        };
+        btnshow.setOnClickListener(addBtnOk);
+
+
+
+
+
+
+
         // начальная инициализация списка
         setInitialData();
         // получаем элемент ListView
@@ -108,10 +165,20 @@ public class MainActivity extends AppCompatActivity
 
 
 
+    }
+
+
+    public void onClick(View v) {
+
+
+
 
 
     }
-    private void setInitialData(){
+
+
+
+        private void setInitialData(){
         Date date = new Date();
         DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
 
